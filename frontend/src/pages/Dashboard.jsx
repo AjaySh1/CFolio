@@ -14,10 +14,10 @@ import CombinedHeatmap from "../components/CombinedHeatmap";
 const colorSchemes = {
   light: {
     background: 'bg-gray-50',
-    card: 'bg-gray-200', // darker card bg for contrast
-    text: 'text-black',   // black text for readability
+    card: 'bg-white',
+    text: 'text-black',
     accent: 'text-blue-700',
-    border: 'border-gray-300'
+    border: 'border-gray-200'
   },
   dark: {
     background: 'bg-gray-900',
@@ -75,10 +75,8 @@ const Dashboard = () => {
           throw new Error('Failed to fetch dashboard data');
         }
         const data = await response.json();
-        console.log("Dashboard Data:", data);
         setDashboardData(data);
       } catch (error) {
-
         console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
@@ -149,6 +147,16 @@ const Dashboard = () => {
   const codechefRating = getContestRating('codechef');
   const codeforcesRating = getContestRating('codeforces');
 
+  // Helper for card backgrounds
+  const cardBg = isDark
+    ? "bg-gradient-to-br from-gray-900/80 to-gray-800/60 border-white/10"
+    : "bg-gradient-to-br from-white to-gray-100 border-gray-200";
+
+  // Helper for inner card backgrounds (breakdown rows)
+  const innerCardBg = isDark
+    ? "bg-gray-800/50 border-white/5"
+    : "bg-gray-100 border-gray-200";
+
   return (
     <div>
       <Header />
@@ -158,8 +166,8 @@ const Dashboard = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-80 h-full bg-gradient-to-b from-gray-900/80 to-gray-900/60 backdrop-blur-lg p-6 border-r border-white/5 shadow-2xl space-y-8 flex flex-col overflow-y-auto"
-        >
+          className="w-80 h-full bg-gradient-to-b from-blue-900/80 to-red-800/60 backdrop-blur-lg p-6 border-r border-white/5 shadow-2xl space-y-8 flex flex-col overflow-y-auto pt-20"
+        > 
           {/* Avatar Section */}
           <div className="flex flex-col items-center">
             <motion.div
@@ -322,48 +330,46 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Main Content */}
-        <div className={`flex-1 p-6 pt-24 overflow-y-auto`}>
-          <div className={`${scheme.card} rounded-2xl shadow-lg p-6 mb-6 ${scheme.text} ${scheme.border} border`}>
+        <div className={`flex-1 p-6 pt-24 overflow-y-auto flex flex-col gap-6`}>
+          {/* Heatmap */}
+          <div className={`${scheme.card} rounded-2xl shadow-lg p-6 ${scheme.text} ${scheme.border} border`}>
             <CombinedHeatmap profileData={profileData} />
           </div>
-          {/* ...rest of your dashboard cards and content... */}
-          {/* (Keep your existing cards and stats rendering code here, but wrap each card in a div with `${scheme.card} ... ${scheme.text} ${scheme.border} border` for consistency) */}
-           <motion.div
+
+          {/* First Row: Total Questions, DSA Breakdown, Competitive Platforms */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Total Questions Solved */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 rounded-2xl border border-white/10 p-6 shadow-lg backdrop-blur-sm"
+              className={`rounded-2xl border p-6 shadow-lg backdrop-blur-sm flex flex-col items-center justify-center ${cardBg}`}
             >
-              <div className="flex flex-col items-center justify-center h-full">
-                <h1 className="text-xl font-semibold text-gray-300 mb-4 text-center">Total Questions Solved</h1>
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
-                  className="text-6xl font-bold text-yellow-400 flex items-center justify-center h-full"
-                >
-                  {getTotalQuestionsSolved()}
-                </motion.div>
-                <p className="text-sm text-gray-400 mt-4">Across all platforms</p>
-              </div>
+              <h1 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4 text-center">Total Questions Solved</h1>
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+                className="text-6xl font-bold text-yellow-400 flex items-center justify-center h-full"
+              >
+                {getTotalQuestionsSolved()}
+              </motion.div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">Across all platforms</p>
             </motion.div>
 
-            {/* Card 2: LeetCode Statistics */}
+            {/* LeetCode Statistics */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 rounded-2xl border border-white/10 p-6 shadow-lg backdrop-blur-sm"
+              className={`rounded-2xl border p-6 shadow-lg backdrop-blur-sm flex flex-col ${cardBg}`}
             >
               <div className="flex items-center justify-center mb-4">
-                <h3 className="text-xl font-semibold text-white">DSA</h3>
+                <h3 className="text-xl font-semibold text-gray-700 dark:text-white">DSA</h3>
               </div>
-
-              {/* Circular Progress with Total */}
               <div className="flex flex-col items-center mb-6">
                 <div className="w-32 h-32 relative mb-4">
                   <svg viewBox="0 0 100 100" className="w-full h-full">
-                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="#374151" strokeWidth="8" />
-
+                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="#e5e7eb" strokeWidth="8" />
                     {/* Easy */}
                     {leetCodeBreakdown.easy > 0 && (
                       <circle
@@ -371,14 +377,13 @@ const Dashboard = () => {
                         cy="50"
                         r="40"
                         fill="transparent"
-                        stroke="#22c55e" // green
+                        stroke="#22c55e"
                         strokeWidth="8"
                         strokeLinecap="round"
                         strokeDasharray={`${(leetCodeBreakdown.easy / getPlatformQuestions('leetcode')) * 251} 251`}
                         transform="rotate(-90 50 50)"
                       />
                     )}
-
                     {/* Medium */}
                     {leetCodeBreakdown.medium > 0 && (
                       <circle
@@ -386,7 +391,7 @@ const Dashboard = () => {
                         cy="50"
                         r="40"
                         fill="transparent"
-                        stroke="#facc15" // yellow
+                        stroke="#facc15"
                         strokeWidth="8"
                         strokeLinecap="round"
                         strokeDasharray={`${(leetCodeBreakdown.medium / getPlatformQuestions('leetcode')) * 251} 251`}
@@ -394,7 +399,6 @@ const Dashboard = () => {
                         transform="rotate(-90 50 50)"
                       />
                     )}
-
                     {/* Hard */}
                     {leetCodeBreakdown.hard > 0 && (
                       <circle
@@ -402,7 +406,7 @@ const Dashboard = () => {
                         cy="50"
                         r="40"
                         fill="transparent"
-                        stroke="#ef4444" // red
+                        stroke="#ef4444"
                         strokeWidth="8"
                         strokeLinecap="round"
                         strokeDasharray={`${(leetCodeBreakdown.hard / getPlatformQuestions('leetcode')) * 251} 251`}
@@ -413,64 +417,57 @@ const Dashboard = () => {
                         transform="rotate(-90 50 50)"
                       />
                     )}
-
                     <text
                       x="50"
                       y="50"
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className="text-2xl font-bold fill-white"
+                      className="text-2xl font-bold fill-gray-700 dark:fill-white"
                     >
                       {getPlatformQuestions('leetcode')}
                     </text>
                   </svg>
                 </div>
-
               </div>
-
               {/* Difficulty Breakdown */}
               <div className="space-y-3">
-                <div className="flex justify-between items-center bg-gray-800/50 p-3 rounded-lg border border-white/5">
+                <div className={`flex justify-between items-center p-3 rounded-lg border ${innerCardBg}`}>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-gray-300">Easy</span>
+                    <span className="text-gray-700 dark:text-gray-300">Easy</span>
                   </div>
-                  <span className="text-white font-medium">{leetCodeBreakdown.easy}</span>
+                  <span className="text-gray-900 dark:text-white font-medium">{leetCodeBreakdown.easy}</span>
                 </div>
-                <div className="flex justify-between items-center bg-gray-800/50 p-3 rounded-lg border border-white/5">
+                <div className={`flex justify-between items-center p-3 rounded-lg border ${innerCardBg}`}>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                    <span className="text-gray-300">Medium</span>
+                    <span className="text-gray-700 dark:text-gray-300">Medium</span>
                   </div>
-                  <span className="text-white font-medium">{leetCodeBreakdown.medium}</span>
+                  <span className="text-gray-900 dark:text-white font-medium">{leetCodeBreakdown.medium}</span>
                 </div>
-                <div className="flex justify-between items-center bg-gray-800/50 p-3 rounded-lg border border-white/5">
+                <div className={`flex justify-between items-center p-3 rounded-lg border ${innerCardBg}`}>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
-                    <span className="text-gray-300">Hard</span>
+                    <span className="text-gray-700 dark:text-gray-300">Hard</span>
                   </div>
-                  <span className="text-white font-medium">{leetCodeBreakdown.hard}</span>
+                  <span className="text-gray-900 dark:text-white font-medium">{leetCodeBreakdown.hard}</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Card 3: CodeChef & CodeForces Distribution */}
+            {/* CodeChef & CodeForces Distribution */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
-              className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 rounded-2xl border border-white/10 p-6 shadow-lg backdrop-blur-sm"
+              className={`rounded-2xl border p-6 shadow-lg backdrop-blur-sm flex flex-col ${cardBg}`}
             >
-              <h3 className="text-xl font-semibold text-white mb-6 text-center">Competitive Platforms</h3>
-
-              {/* Platform Distribution */}
+              <h3 className="text-xl font-semibold text-gray-700 dark:text-white mb-6 text-center">Competitive Platforms</h3>
               <div className="flex flex-col items-center mb-6">
                 <div className="w-40 h-40 relative">
                   <svg viewBox="0 0 100 100" className="w-full h-full">
-                    {/* Background circle */}
-                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="#374151" strokeWidth="8" />
-
-                    {/* CodeChef circle */}
+                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="#e5e7eb" strokeWidth="8" />
+                    {/* CodeChef */}
                     {getPlatformQuestions('codechef') > 0 && (
                       <circle
                         cx="50"
@@ -486,8 +483,7 @@ const Dashboard = () => {
                         transform="rotate(-90 50 50)"
                       />
                     )}
-
-                    {/* Codeforces circle - only render if non-zero */}
+                    {/* Codeforces */}
                     {getPlatformQuestions('codeforces') > 0 && (
                       <circle
                         cx="50"
@@ -506,34 +502,30 @@ const Dashboard = () => {
                         transform="rotate(-90 50 50)"
                       />
                     )}
-
-                    {/* Total count in center */}
                     <text
                       x="50"
                       y="50"
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className="text-lg font-bold fill-white"
+                      className="text-lg font-bold fill-gray-700 dark:fill-white"
                     >
                       {getPlatformQuestions('codechef') + getPlatformQuestions('codeforces')}
                     </text>
                   </svg>
-
                 </div>
               </div>
-
               {/* Platform Details */}
               <div className="space-y-4">
                 {user.codechef_username && (
                   <motion.div
                     whileHover={{ x: 5 }}
-                    className="flex items-center justify-between bg-gray-800/50 p-4 rounded-xl border border-white/5"
+                    className={`flex items-center justify-between p-4 rounded-xl border ${innerCardBg}`}
                   >
                     <div className="flex items-center">
                       <SiCodechef className="text-red-500 mr-3" size={20} />
-                      <span className="text-white">CodeChef</span>
+                      <span className="text-gray-900 dark:text-white">CodeChef</span>
                     </div>
-                    <div className="text-white font-medium">
+                    <div className="text-gray-900 dark:text-white font-medium">
                       {getPlatformQuestions('codechef')}
                     </div>
                   </motion.div>
@@ -541,13 +533,13 @@ const Dashboard = () => {
                 {user.codeforces_username && (
                   <motion.div
                     whileHover={{ x: 5 }}
-                    className="flex items-center justify-between bg-gray-800/50 p-4 rounded-xl border border-white/5"
+                    className={`flex items-center justify-between p-4 rounded-xl border ${innerCardBg}`}
                   >
                     <div className="flex items-center">
                       <SiCodeforces className="text-blue-400 mr-3" size={20} />
-                      <span className="text-white">CodeForces</span>
+                      <span className="text-gray-900 dark:text-white">CodeForces</span>
                     </div>
-                    <div className="text-white font-medium">
+                    <div className="text-gray-900 dark:text-white font-medium">
                       {getPlatformQuestions('codeforces')}
                     </div>
                   </motion.div>
@@ -557,31 +549,31 @@ const Dashboard = () => {
           </div>
 
           {/* Second Row: Contest Ratings */}
-          <div className="grid grid-cols-1 mt-6 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* LeetCode Contest Rating */}
             {leetCodeRating && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 rounded-2xl border border-white/10 p-6 shadow-lg backdrop-blur-sm"
+                className={`rounded-2xl border p-6 shadow-lg backdrop-blur-sm max-h-[200px] h-full flex flex-col justify-between ${cardBg}`}
               >
                 <div className="flex items-center justify-center mb-4">
                   <SiLeetcode className="text-yellow-400 mr-2" size={20} />
-                  <h3 className="text-xl font-semibold text-white">LeetCode Rating</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">LeetCode Rating</h3>
                 </div>
                 <div className="flex flex-col items-center justify-center">
                   <div className="text-4xl font-bold text-yellow-400 mb-2">
                     {leetCodeRating.recent || 'N/A'}
                   </div>
-                  <div className="text-sm text-gray-400 mb-4">Current Rating</div>
-                  <div className="w-full bg-gray-700 rounded-full h-2.5 mb-2">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Current Rating</div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-2">
                     <div
                       className="bg-yellow-400 h-2.5 rounded-full"
                       style={{ width: `${Math.min(100, (leetCodeRating.recent / (leetCodeRating.max || 2500)) * 100)}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between w-full text-xs text-gray-400">
+                  <div className="flex justify-between w-full text-xs text-gray-500 dark:text-gray-400">
                     <span>0</span>
                     <span>Max: {leetCodeRating.max || 'N/A'}</span>
                   </div>
@@ -595,11 +587,11 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
-                className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 rounded-2xl border border-white/10 p-6 shadow-lg backdrop-blur-sm"
+                className={`rounded-2xl border p-6 shadow-lg backdrop-blur-sm max-h-[200px] h-full flex flex-col justify-between ${cardBg}`}
               >
                 <div className="flex items-center justify-center mb-4">
                   <SiCodechef className="text-red-500 mr-2" size={20} />
-                  <h3 className="text-xl font-semibold text-white">CodeChef Rating</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">CodeChef Rating</h3>
                 </div>
                 <div className="flex flex-col items-center justify-center">
                   <div className="flex items-center mb-2">
@@ -612,14 +604,14 @@ const Dashboard = () => {
                       </div>
                     )}
                   </div>
-                  <div className="text-sm text-gray-400 mb-4">Current Rating</div>
-                  <div className="w-full bg-gray-700 rounded-full h-2.5 mb-2">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Current Rating</div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-2">
                     <div
                       className="bg-red-500 h-2.5 rounded-full"
                       style={{ width: `${Math.min(100, (codechefRating.recent / (codechefRating.max || 5000)) * 100)}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between w-full text-xs text-gray-400">
+                  <div className="flex justify-between w-full text-xs text-gray-500 dark:text-gray-400">
                     <span>0</span>
                     <span>Max: {codechefRating.max || 'N/A'}</span>
                   </div>
@@ -633,35 +625,34 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 }}
-                className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 rounded-2xl border border-white/10 p-6 shadow-lg backdrop-blur-sm"
+                className={`rounded-2xl border p-6 shadow-lg backdrop-blur-sm max-h-[200px] h-full flex flex-col justify-between ${cardBg}`}
               >
                 <div className="flex items-center justify-center mb-4">
                   <SiCodeforces className="text-blue-400 mr-2" size={20} />
-                  <h3 className="text-xl font-semibold text-white">CodeForces Rating</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">CodeForces Rating</h3>
                 </div>
                 <div className="flex flex-col items-center justify-center">
                   <div className="text-4xl font-bold text-blue-400 mb-2">
                     {codeforcesRating.recent || 'N/A'}
                   </div>
-                  <div className="text-sm text-gray-400 mb-4">Current Rating</div>
-                  <div className="w-full bg-gray-700 rounded-full h-2.5 mb-2">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">Current Rating</div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-2">
                     <div
                       className="bg-blue-400 h-2.5 rounded-full"
                       style={{ width: `${Math.min(100, (codeforcesRating.recent / (codeforcesRating.max || 3000)) * 100)}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between w-full text-xs text-gray-400">
+                  <div className="flex justify-between w-full text-xs text-gray-500 dark:text-gray-400">
                     <span>0</span>
                     <span>Max: {codeforcesRating.max || 'N/A'}</span>
                   </div>
                 </div>
               </motion.div>
             )}
-
           </div>
         </div>
       </div>
-   
+    </div>
   );
 };
 

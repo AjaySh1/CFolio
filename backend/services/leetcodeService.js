@@ -390,7 +390,15 @@ class LeetcodeService {
           userData.streakCount = 0;
         }
       }
-  
+       if (userData.contestRanking && userData.contestRanking.rating) {
+        userData.contestRanking.rating = parseInt(userData.contestRanking.rating);
+      }
+      if (userData.contestHistory && Array.isArray(userData.contestHistory)) {
+        userData.contestHistory = userData.contestHistory.map(entry => ({
+          ...entry,
+          rating: entry.rating ? parseInt(entry.rating) : entry.rating
+        }));
+      }
       return userData;
     } catch (error) {
       console.error(`Failed to fetch comprehensive data for user ${username}:`, error);

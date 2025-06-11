@@ -10,6 +10,20 @@ const CombinedHeatmap = ({ profileData }) => {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
+  // Detect dark mode (same as CodechefPage)
+  const [isDark, setIsDark] = useState(() =>
+    typeof window !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : false
+  );
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     if (
       !profileData ||
@@ -107,7 +121,14 @@ const CombinedHeatmap = ({ profileData }) => {
   }
 
   return (
-    <div className="text-white mt-2 rounded-2xl p-6 bg-gradient-to-br from-gray-900/80 to-gray-800/60 border border-white/10 shadow-lg backdrop-blur-sm">
+    <div
+      className={`mt-2 rounded-2xl p-6 border shadow-lg backdrop-blur-sm
+        ${isDark
+          ? "text-white bg-gradient-to-br from-gray-900/80 to-gray-800/60 border-white/10"
+          : "text-gray-900 bg-white border-gray-200"
+        }`
+      }
+    >
       <div className="flex justify-between items-center mb-2 ">
         <div className="text-sm">
           <span className="text-xl font-semibold">{totalSubmissions}</span> submissions in the past year

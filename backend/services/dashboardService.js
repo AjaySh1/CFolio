@@ -21,17 +21,29 @@ class DashboardService {
       leetcode_max_contest_rating: null
     };
     if (userProfile && userProfile.leetcode_username) {
-      try {
-        const lcData = await leetcodeService.fetchUserComprehensiveData(userProfile.leetcode_username);
-        leetcodeStats.leetcode_total = lcData.totalSolved || 0;
-        leetcodeStats.leetcode_easy = lcData.easySolved || 0;
-        leetcodeStats.leetcode_medium = lcData.mediumSolved || 0;
-        leetcodeStats.leetcode_hard = lcData.hardSolved || 0;
-        leetcodeContest.leetcode_recent_contest_rating = lcData.contestRating?.recent || null;
-        leetcodeContest.leetcode_max_contest_rating = lcData.contestRating?.max || null;
-      } catch (e) {}
-    }
+  try {
+    console.log("DASHBOARD LeetCode username:", userProfile.leetcode_username);
+    const lcData = await leetcodeService.fetchUserComprehensiveData(userProfile.leetcode_username);
+    console.log("DASHBOARD LeetCode Data:", lcData);
+    const acStats = lcData.problemsSolved?.solvedStats?.submitStatsGlobal?.acSubmissionNum || [];
+    console.log("DASHBOARD LeetCode acStats:", acStats);
+    leetcodeStats.leetcode_total = acStats.find(x => x.difficulty === 'All')?.count || 0;
+    leetcodeStats.leetcode_easy = acStats.find(x => x.difficulty === 'Easy')?.count || 0;
+    leetcodeStats.leetcode_medium = acStats.find(x => x.difficulty === 'Medium')?.count || 0;
+    leetcodeStats.leetcode_hard = acStats.find(x => x.difficulty === 'Hard')?.count || 0;
 
+    // Contest rating info
+    const contest = lcData.contestRanking || {};
+    leetcodeContest.leetcode_recent_contest_rating = contest.rating || null;
+    if (lcData.contestHistory && lcData.contestHistory.length > 0) {
+      leetcodeContest.leetcode_max_contest_rating = Math.max(...lcData.contestHistory.map(c => c.rating || 0));
+    } else {
+      leetcodeContest.leetcode_max_contest_rating = contest.rating || null;
+    }
+  } catch (e) {
+    console.error("LeetCode fetch error:", e);
+  }
+}
     // Codeforces
     let codeforcesStats = { codeforces_total: 0 };
     let codeforcesContest = {
