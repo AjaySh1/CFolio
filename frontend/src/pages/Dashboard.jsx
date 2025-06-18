@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import Header from "../components/Header";
-import { useUserProfile } from "../context/UserProfileContext";
+import { UserAuth } from "../context/AuthContext";
 import { FiMail, FiMapPin, FiExternalLink } from "react-icons/fi";
 import { SiLeetcode, SiCodechef, SiCodeforces } from "react-icons/si";
 import { MdVerified } from "react-icons/md";
@@ -29,7 +29,8 @@ const colorSchemes = {
 };
 
 const Dashboard = () => {
-  const { profileData } = useUserProfile();
+ const { user } = UserAuth();
+const User = user?.user || user; 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -50,27 +51,27 @@ const Dashboard = () => {
 
   const scheme = isDark ? colorSchemes.dark : colorSchemes.light;
 
-  const user = {
-    name: profileData?.name || "",
-    email: profileData?.email || "",
-    emailVerified: profileData?.emailVerified || true,
-    linkedin: profileData?.linkedin || "",
-    github: profileData?.github || "",
-    organization: profileData?.education || "",
-    location: profileData?.location || "",
-    work: profileData?.work || "",
-    codeforces_username: profileData?.codeforces_username || "",
-    leetcode_username: profileData?.leetcode_username || "",
-    codechef_username: profileData?.codechef_username || "",
+  const userProfile = {
+    name: user?.name || "",
+    email: user?.email || "",
+    emailVerified: user?.emailVerified || true,
+    linkedin: user?.linkedin || "",
+    github: user?.github || "",
+    organization: user?.education || "",
+    location: user?.location || "",
+    work: user?.work || "",
+    codeforces_username: user?.codeforces_username || "",
+    leetcode_username: user?.leetcode_username || "",
+    codechef_username: user?.codechef_username || "",
   };
-
+    console.log("UserProfile in Dashboard:", userProfile);
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!profileData?.email) return;
+      if (!user?.email) return;
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/dashboard/${profileData.email}`);
+        const response = await fetch(`${API_BASE}/api/dashboard/${user._id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch dashboard data');
         }
@@ -84,7 +85,7 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, [profileData, API_BASE]);
+  }, [user, API_BASE]);
 
   const getAvatar = (name) => {
     if (!name) return "👤";
@@ -156,7 +157,6 @@ const Dashboard = () => {
   const innerCardBg = isDark
     ? "bg-gray-800/50 border-white/5"
     : "bg-gray-100 border-gray-200";
-
   return (
     <div>
       <Header />
@@ -166,8 +166,8 @@ const Dashboard = () => {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-80 h-full bg-gradient-to-b from-blue-900/80 to-red-800/60 backdrop-blur-lg p-6 border-r border-white/5 shadow-2xl space-y-8 flex flex-col overflow-y-auto pt-20"
-        > 
+          className="fixed top-0 left-0 right-0 w-80 h-screen bg-gradient-to-b from-blue-900/80 to-red-800/60 backdrop-blur-lg p-6 border-r border-white/5 shadow-2xl space-y-8 flex flex-col overflow-y-auto pt-20"
+        >
           {/* Avatar Section */}
           <div className="flex flex-col items-center">
             <motion.div
@@ -188,7 +188,7 @@ const Dashboard = () => {
                   animate={{ scale: 1 }}
                   className="text-green-400 ml-1"
                 >
-                  <MdVerified size={18} />
+                  <MdVerified size={10} />
                 </motion.div>
               )}
             </div>
@@ -330,10 +330,10 @@ const Dashboard = () => {
         </motion.div>
 
         {/* Main Content */}
-        <div className={`flex-1 p-6 pt-24 overflow-y-auto flex flex-col gap-6`}>
+        <div className={`ml-80 flex-1 p-6 pt-24 overflow-y-auto flex flex-col gap-6`}>
           {/* Heatmap */}
           <div className={`${scheme.card} rounded-2xl shadow-lg p-6 ${scheme.text} ${scheme.border} border`}>
-            <CombinedHeatmap profileData={profileData} />
+            <CombinedHeatmap profileData={userProfile} />
           </div>
 
           {/* First Row: Total Questions, DSA Breakdown, Competitive Platforms */}

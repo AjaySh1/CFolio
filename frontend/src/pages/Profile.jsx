@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Code, Cpu, HardDrive, User, Mail, Check, X, Save, Edit, LogOut, Loader2, MapPin, Github, Linkedin, BookOpen } from 'lucide-react';
+import { User, Mail, MapPin, BookOpen, Github, Linkedin, Code, Cpu, HardDrive, Save, LogOut } from 'lucide-react';
 import Header from '../components/Header';
-import { MdVerified } from "react-icons/md";
-import { useUserProfile } from '../context/UserProfileContext';
+import { UserAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -21,80 +21,55 @@ const itemVariants = {
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export default function Profile() {
-  // Always fallback to {} if context is null
-  const { profileData: contextProfileDataRaw, setProfileData: setProfileContext } = useUserProfile();
-  const contextProfileData = contextProfileDataRaw || {};
+  const { user, setUser } = UserAuth(); // Retrieve user and setUser from context
+  const navigate = useNavigate();
+  console.log('User:', user);
 
-  // Use contextProfileData as initial state
   const [profileData, setProfileData] = useState({
-    name: contextProfileData.name || 'Local User',
-    email: contextProfileData.email || 'local@dev.com',
-    gender: contextProfileData.gender || '',
-    location: contextProfileData.location || '',
-    education: contextProfileData.education || '',
-    github: contextProfileData.github || '',
-    linkedin: contextProfileData.linkedin || '',
-    codeforces_username: contextProfileData.codeforces_username || '',
-    codechef_username: contextProfileData.codechef_username || '',
-    leetcode_username: contextProfileData.leetcode_username || '',
+    name: user?.name || '',
+    email: user?.email || '',
+    github: user?.github || '',
+    linkedin: user?.linkedin || '',
+    codeforces_username: user?.codeforces_username || '',
+    codechef_username: user?.codechef_username || '',
+    leetcode_username: user?.leetcode_username || '',
   });
-  const [initialData, setInitialData] = useState({ ...profileData });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [editableFields, setEditableFields] = useState({
-    name: false,
-    email: false,
-    gender: false,
-    location: false,
-    education: false,
-    github: false,
-    linkedin: false,
-    codeforces_username: false,
-    codechef_username: false,
-    leetcode_username: false,
-  });
 
   // Load profile data from backend on mount
+  const userId = user?._id || user?.id;
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/users/${contextProfileData.email || profileData.email}`);
+        if (!user?.id) {
+          throw new Error('User ID is undefined');
+        }
+        const res = await fetch(`${API_BASE}/api/users/${userId}`); // Use `_id` instead of `id`
         if (res.ok) {
           const data = await res.json();
+          console.log('Profile data fetched:', data);
           setProfileData({
-            name: data.name || 'Local User',
-            email: data.email || 'local@dev.com',
-            gender: data.gender || '',
-            location: data.location || '',
-            education: data.education || '',
+            name: data.name || '',
+            email: data.email || '',
             github: data.github || '',
             linkedin: data.linkedin || '',
             codeforces_username: data.codeforces_username || '',
             codechef_username: data.codechef_username || '',
             leetcode_username: data.leetcode_username || '',
           });
-          setInitialData({
-            name: data.name || 'Local User',
-            email: data.email || 'local@dev.com',
-            gender: data.gender || '',
-            location: data.location || '',
-            education: data.education || '',
-            github: data.github || '',
-            linkedin: data.linkedin || '',
-            codeforces_username: data.codeforces_username || '',
-            codechef_username: data.codechef_username || '',
-            leetcode_username: data.leetcode_username || '',
-          });
-          setProfileContext(data); // Update context on load
+        } else {
+          throw new Error('Failed to fetch profile data');
         }
       } catch (err) {
-        // Ignore if not found
+        console.error('Error fetching profile:', err.message);
+        setError(err.message);
       }
     };
     fetchProfile();
-    // eslint-disable-next-line
-  }, []);
+  }, [user?._id]); // Use `_id` for dependency
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -104,31 +79,6 @@ export default function Profile() {
     }));
   };
 
-  const toggleEdit = (field) => {
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
-  };
-
-  const cancelEdit = () => {
-    setProfileData(initialData);
-    setEditableFields({
-      name: false,
-      email: false,
-      gender: false,
-      location: false,
-      education: false,
-      github: false,
-      linkedin: false,
-      codeforces_username: false,
-      codechef_username: false,
-      leetcode_username: false,
-    });
-    setError(null);
-    setSuccess(null);
-  };
-
   const handleSave = async (e) => {
     e.preventDefault();
     setError(null);
@@ -136,36 +86,28 @@ export default function Profile() {
     setIsSaving(true);
 
     try {
-      if (!profileData.name?.trim()) {
-        throw new Error('Name cannot be empty');
-      }
-      // Save to backend (PUT request)
-      const res = await fetch(`${API_BASE}/api/users/${profileData.email}`, {
+      // Exclude email from the request payload
+      const { email, ...updateData } = profileData;
+
+      const res = await fetch(`${API_BASE}/api/users/${userId}`, { // Use `_id` instead of `id`
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(profileData)
+        body: JSON.stringify(updateData), // Send only the fields excluding email
       });
+
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.error || 'Failed to save profile');
       }
-      setInitialData({ ...profileData });
-      setSuccess('Profile updated!');
-      setEditableFields({
-        name: false,
-        email: false,
-        gender: false,
-        location: false,
-        education: false,
-        github: false,
-        linkedin: false,
-        codeforces_username: false,
-        codechef_username: false,
-        leetcode_username: false,
-      });
-      setProfileContext(profileData); // Update context after save
+
+      const updatedProfile = await res.json();
+      setSuccess('Profile updated successfully!');
+      setUser(updatedProfile.user || updatedProfile); // Update user in AuthContext
+      setTimeout(() => {
+        navigate('/dashboard'); // Redirect to dashboard after success
+      }, 1000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -173,14 +115,11 @@ export default function Profile() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      setProfileContext({}); // Clear context on logout, never set to null
       window.location.href = '/';
     }
   };
-
-  const hasChanges = JSON.stringify(profileData) !== JSON.stringify(initialData);
 
   return (
     <div className="pt-28 min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
@@ -210,10 +149,7 @@ export default function Profile() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <div className="flex items-center">
-                  <X className="h-5 w-5 mr-2" />
-                  {error}
-                </div>
+                {error}
               </motion.div>
             )}
             {success && (
@@ -222,310 +158,125 @@ export default function Profile() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 mr-2" />
-                  {success}
-                </div>
+                {success}
               </motion.div>
             )}
 
             <motion.form className="space-y-6" onSubmit={handleSave} variants={containerVariants}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information Column */}
-                <div className="space-y-6">
-                  {/* Name */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex justify-between items-center">
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Name
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => toggleEdit('name')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {editableFields.name ? <X className="h-4 w-4" onClick={cancelEdit} /> : <Edit className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        value={profileData.name || ""}
-                        onChange={handleChange}
-                        readOnly={!editableFields.name}
-                        className={`block w-full pl-10 pr-3 py-2 border rounded-md ${
-                          editableFields.name
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                        } sm:text-sm`}
-                        placeholder="Name"
-                      />
-                    </div>
-                  </motion.div>
-                  {/* Email */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex justify-between items-center">
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Email
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => toggleEdit('email')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {editableFields.email ? <X className="h-4 w-4" onClick={cancelEdit} /> : <Edit className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={profileData.email || ""}
-                        onChange={handleChange}
-                        readOnly={!editableFields.email}
-                        className={`block w-full pl-10 pr-3 py-2 border rounded-md ${
-                          editableFields.email
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                        } sm:text-sm`}
-                        placeholder="Email"
-                      />
-                    </div>
-                  </motion.div>
-                  {/* Gender */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex justify-between items-center">
-                      <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Gender
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => toggleEdit('gender')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {editableFields.gender ? <X className="h-4 w-4" onClick={cancelEdit} /> : <Edit className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <input
-                        id="gender"
-                        name="gender"
-                        type="text"
-                        value={profileData.gender || ""}
-                        onChange={handleChange}
-                        readOnly={!editableFields.gender}
-                        className={`block w-full pr-3 py-2 border rounded-md ${
-                          editableFields.gender
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                        } sm:text-sm`}
-                        placeholder="Gender"
-                      />
-                    </div>
-                  </motion.div>
-                  {/* Location */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex justify-between items-center">
-                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Location
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => toggleEdit('location')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {editableFields.location ? <X className="h-4 w-4" onClick={cancelEdit} /> : <Edit className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MapPin className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="location"
-                        name="location"
-                        type="text"
-                        value={profileData.location || ""}
-                        onChange={handleChange}
-                        readOnly={!editableFields.location}
-                        className={`block w-full pl-10 pr-3 py-2 border rounded-md ${
-                          editableFields.location
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                        } sm:text-sm`}
-                        placeholder="Location"
-                      />
-                    </div>
-                  </motion.div>
-                  {/* Education */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex justify-between items-center">
-                      <label htmlFor="education" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Education
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => toggleEdit('education')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {editableFields.education ? <X className="h-4 w-4" onClick={cancelEdit} /> : <Edit className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <BookOpen className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="education"
-                        name="education"
-                        type="text"
-                        value={profileData.education || ""}
-                        onChange={handleChange}
-                        readOnly={!editableFields.education}
-                        className={`block w-full pl-10 pr-3 py-2 border rounded-md ${
-                          editableFields.education
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                        } sm:text-sm`}
-                        placeholder="Education"
-                      />
-                    </div>
-                  </motion.div>
-                </div>
+              {/* Name */}
+              <motion.div variants={itemVariants}>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={profileData.name}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white sm:text-sm"
+                  placeholder="Your Name"
+                />
+              </motion.div>
 
-                {/* Social & Coding Profiles Column */}
-                <div className="space-y-6">
-                  {/* Github */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex justify-between items-center">
-                      <label htmlFor="github" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Github
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => toggleEdit('github')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {editableFields.github ? <X className="h-4 w-4" onClick={cancelEdit} /> : <Edit className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Github className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="github"
-                        name="github"
-                        type="text"
-                        value={profileData.github || ""}
-                        onChange={handleChange}
-                        readOnly={!editableFields.github}
-                        className={`block w-full pl-10 pr-3 py-2 border rounded-md ${
-                          editableFields.github
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                        } sm:text-sm`}
-                        placeholder="Github"
-                      />
-                    </div>
-                  </motion.div>
-                  {/* Linkedin */}
-                  <motion.div variants={itemVariants}>
-                    <div className="flex justify-between items-center">
-                      <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Linkedin
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => toggleEdit('linkedin')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {editableFields.linkedin ? <X className="h-4 w-4" onClick={cancelEdit} /> : <Edit className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <div className="mt-1 relative rounded-md shadow-sm">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Linkedin className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="linkedin"
-                        name="linkedin"
-                        type="text"
-                        value={profileData.linkedin || ""}
-                        onChange={handleChange}
-                        readOnly={!editableFields.linkedin}
-                        className={`block w-full pl-10 pr-3 py-2 border rounded-md ${
-                          editableFields.linkedin
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                        } sm:text-sm`}
-                        placeholder="Linkedin"
-                      />
-                    </div>
-                  </motion.div>
-                  {/* Coding Usernames */}
-                  {[
-                    { id: 'codeforces_username', icon: Code, label: 'Codeforces Username', maxLength: 24 },
-                    { id: 'codechef_username', icon: Cpu, label: 'CodeChef Username', maxLength: 24 },
-                    { id: 'leetcode_username', icon: HardDrive, label: 'LeetCode Username', maxLength: 24 },
-                  ].map(({ id, icon: Icon, label, maxLength }) => (
-                    <motion.div key={id} variants={itemVariants}>
-                      <div className="flex justify-between items-center">
-                        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {label}
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => toggleEdit(id)}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                        >
-                          {editableFields[id] ? (
-                            <X className="h-4 w-4" onClick={cancelEdit} />
-                          ) : (
-                            <Edit className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                      <div className="mt-1 relative rounded-md shadow-sm">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Icon className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                          id={id}
-                          name={id}
-                          type="text"
-                          value={profileData[id] || ""}
-                          onChange={handleChange}
-                          readOnly={!editableFields[id]}
-                          maxLength={maxLength}
-                          className={`block w-full pl-10 pr-3 py-2 border rounded-md ${
-                            editableFields[id]
-                              ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-transparent'
-                          } sm:text-sm`}
-                          placeholder={`${label}`}
-                        />
-                      </div>
-                      {editableFields[id] && (
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          {profileData[id]?.length || 0}/{maxLength} characters
-                        </p>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              {/* Email */}
+              <motion.div variants={itemVariants}>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={profileData.email}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white sm:text-sm"
+                  placeholder="Your Email"
+                  disabled
+                />
+              </motion.div>
 
-              {/* Action Buttons */}
+              {/* Github */}
+              <motion.div variants={itemVariants}>
+                <label htmlFor="github" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Github
+                </label>
+                <input
+                  id="github"
+                  name="github"
+                  type="text"
+                  value={profileData.github}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white sm:text-sm"
+                  placeholder="Github Profile URL"
+                />
+              </motion.div>
+
+              {/* Linkedin */}
+              <motion.div variants={itemVariants}>
+                <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Linkedin
+                </label>
+                <input
+                  id="linkedin"
+                  name="linkedin"
+                  type="text"
+                  value={profileData.linkedin}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white sm:text-sm"
+                  placeholder="Linkedin Profile URL"
+                />
+              </motion.div>
+
+              {/* Codeforces */}
+              <motion.div variants={itemVariants}>
+                <label htmlFor="codeforces_username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Codeforces Username
+                </label>
+                <input
+                  id="codeforces_username"
+                  name="codeforces_username"
+                  type="text"
+                  value={profileData.codeforces_username}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white sm:text-sm"
+                  placeholder="Codeforces Username"
+                />
+              </motion.div>
+
+              {/* Codechef */}
+              <motion.div variants={itemVariants}>
+                <label htmlFor="codechef_username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Codechef Username
+                </label>
+                <input
+                  id="codechef_username"
+                  name="codechef_username"
+                  type="text"
+                  value={profileData.codechef_username}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white sm:text-sm"
+                  placeholder="Codechef Username"
+                />
+              </motion.div>
+
+              {/* Leetcode */}
+              <motion.div variants={itemVariants}>
+                <label htmlFor="leetcode_username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Leetcode Username
+                </label>
+                <input
+                  id="leetcode_username"
+                  name="leetcode_username"
+                  type="text"
+                  value={profileData.leetcode_username}
+                  onChange={handleChange}
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white sm:text-sm"
+                  placeholder="Leetcode Username"
+                />
+              </motion.div>
+
+              {/* Save and Logout Buttons */}
               <motion.div
                 variants={itemVariants}
                 className="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700"
@@ -538,38 +289,27 @@ export default function Profile() {
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </button>
-                <div className="flex space-x-2">
-                  {hasChanges && (
-                    <button
-                      type="button"
-                      onClick={cancelEdit}
-                      className="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
-                    >
-                      Cancel
-                    </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className={`inline-flex items-center px-4 py-2 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    isSaving
+                      ? 'bg-gray-400 cursor-not-allowed focus:ring-gray-500'
+                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                  } transition-colors`}
+                >
+                  {isSaving ? (
+                    <>
+                      <Save className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </>
                   )}
-                  <button
-                    type="submit"
-                    disabled={!hasChanges || isSaving}
-                    className={`inline-flex items-center px-4 py-2 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                      !hasChanges || isSaving
-                        ? 'bg-gray-400 cursor-not-allowed focus:ring-gray-500'
-                        : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
-                    } transition-colors`}
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                </div>
+                </button>
               </motion.div>
             </motion.form>
           </div>

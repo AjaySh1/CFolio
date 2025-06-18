@@ -4,13 +4,10 @@ const codechefService = require('./codechefService');
 const userService = require('./userService'); // For getting usernames
 
 class DashboardService {
-  // Fetch live data from platforms and return in frontend-compatible format
   static async getDashboardData(userId) {
-    // Get user's platform usernames from userService
     const userProfile = await userService.getProfile(userId);
-
-    // LeetCode
-    let leetcodeStats = {
+    console.log("User Profile: at backend ", userProfile);
+  let leetcodeStats = {
       leetcode_total: 0,
       leetcode_easy: 0,
       leetcode_medium: 0,
@@ -104,4 +101,4 @@ class DashboardService {
   }
 }
 
-module.exports = DashboardService;
+module.exports = DashboardService; // Export the class

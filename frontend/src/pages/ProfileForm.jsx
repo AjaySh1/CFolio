@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Code, Cpu, HardDrive, User, Check, X, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { UserAuth } from '../context/AuthContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,16 +31,29 @@ export default function ProfileForm() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
-  const userId = formData.name || 'demo-user';
+  // Get the actual user from AuthContext
+  const { user } = UserAuth();
+  // Use user.id, user._id, or user.username as per your backend
+  const userId = user?.id || user?._id || user?.username;
+
+  // Debugging logs for `user` and `userId`
+  useEffect(() => {
+    console.log('User from AuthContext:', user); // Debugging log
+    console.log('Derived userId:', userId); // Debugging log
+  }, [user, userId]);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!userId) return;
+      if (!userId) {
+        console.error('userId is undefined'); // Debugging log
+        return;
+      }
       try {
         setIsLoading(true);
         const response = await fetch(`${API_BASE}/api/users/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch profile');
         const data = await response.json();
+        console.log('Fetched profile data:', data); // Debugging log
         setFormData({
           name: data.name || '',
           codeforces: data.codeforces_username || '',
@@ -47,6 +61,7 @@ export default function ProfileForm() {
           leetcode: data.leetcode_username || ''
         });
       } catch (err) {
+        console.error('Error fetching profile:', err.message); // Debugging log
         setError(err.message);
       } finally {
         setIsLoading(false);
@@ -54,7 +69,7 @@ export default function ProfileForm() {
     };
     fetchProfile();
     // eslint-disable-next-line
-  }, []);
+  }, [userId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,14 +93,17 @@ export default function ProfileForm() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Error updating profile:', errorData); // Debugging log
         throw new Error(errorData.error || 'Failed to update profile');
       }
 
+      console.log('Profile updated successfully'); // Debugging log
       setSuccess('Profile saved successfully!');
       setTimeout(() => {
         navigate('/profile');
       }, 1500);
     } catch (err) {
+      console.error('Error during profile update:', err.message); // Debugging log
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -102,7 +120,6 @@ export default function ProfileForm() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#fefcf9] to-gray-100 dark:from-gray-900 dark:to-gray-800 flex flex-col py-12 sm:px-6 lg:px-8">
-      
       {/* Dark Mode Toggle */}
       <div className="absolute top-4 right-4">
         <button

@@ -1,26 +1,58 @@
 import { createContext, useContext, useState } from 'react';
+import { UserAuth } from './AuthContext'; // Import AuthContext
 
 const UserProfileContext = createContext();
 
 export const UserProfileProvider = ({ children }) => {
-  // Provide initial mock profile data to avoid null errors
-  const [profileData, setProfileData] = useState({
-    name: 'Local User',
-    email: 'local@dev.com',
-    gender: '',
-    location: '',
-    education: '',
-    github: '',
-    linkedin: '',
-    codeforces_username: '',
-    codechef_username: '',
-    leetcode_username: '',
-  });
-  const [loading] = useState(false);
-  const [error] = useState(null);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { setUser } = UserAuth(); // Access the AuthContext's setUser function
+
+  const fetchProfile = async (userId) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/users/${userId}`);
+      const data = await response.json();
+      setProfileData(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (userId, updatedData) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+      const updatedProfile = await response.json();
+      setProfileData(updatedProfile); // Update profileData in UserProfileContext
+      setUser(updatedProfile.user); // Update user in AuthContext
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <UserProfileContext.Provider value={{ profileData, setProfileData, loading, error }}>
+    <UserProfileContext.Provider
+      value={{
+        profileData,
+        setProfileData,
+        loading,
+        error,
+        fetchProfile,
+        updateProfile,
+      }}
+    >
       {children}
     </UserProfileContext.Provider>
   );

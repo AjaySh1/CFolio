@@ -2,8 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const connectDB = require('./db');
 
-// Routes
+// Connect to the database
+connectDB();
+
+// Import routes
 const leetcodeRoutes = require('./routes/leetcodeRoutes');
 const codechefRoutes = require('./routes/codechefRoutes');
 const codeforcesRoutes = require('./routes/codeforcesRoutes');
@@ -11,11 +15,13 @@ const userRoutes = require('./routes/userRoutes');
 const contestRoutes = require('./routes/contestRoutes');
 const heatmapRoutes = require('./routes/heatmapRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const authRoutes = require('./routes/auth');
+const profileRoutes = require('./routes/profile');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security middleware (essential for both dev and prod)
+// Security middleware
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
@@ -25,17 +31,18 @@ app.use(cors({
   exposedHeaders: ['Authorization']
 }));
 
-// Body parser
+// Body parser middleware
 app.use(express.json());
 
-// Routes
+// Define routes
 app.use('/api/leetcode', leetcodeRoutes);
 app.use('/api/codechef', codechefRoutes);
 app.use('/api/codeforces', codeforcesRoutes);
-app.use('/api/users', userRoutes);
 app.use('/api/contests', contestRoutes);
 app.use('/api/dash', heatmapRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', profileRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -45,7 +52,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handling (works for both environments)
+// Fallback route for undefined endpoints
+app.use((req, res, next) => {
+  res.status(404).json({ success: false, error: 'Route not found' });
+});
+
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(err.status || 500).json({
@@ -56,6 +68,7 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });

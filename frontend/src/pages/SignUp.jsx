@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, CheckCircle, X } from 'lucide-react';
-import { FcGoogle } from 'react-icons/fc';
 import { UserAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,24 +10,24 @@ const containerVariants = {
     opacity: 1,
     transition: {
       delayChildren: 0.3,
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
-    opacity: 1
-  }
+    opacity: 1,
+  },
 };
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -37,12 +36,12 @@ export default function SignUp() {
   const [success, setSuccess] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState([]);
-  const { signUpNewUser, signInWithGoogle } = UserAuth();
+  const { signUpNewUser, setUser } = UserAuth(); // Ensure `setUser` is available in context
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'password') {
       checkPasswordStrength(value);
@@ -111,34 +110,25 @@ export default function SignUp() {
     setIsLoading(true);
     setError('');
     setSuccess('');
-  
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
       setIsLoading(false);
       return;
     }
-  
+
     try {
-      await signUpNewUser(formData.email, formData.password);
-      setSuccess('Confirm your email-id.....');
+      const result = await signUpNewUser(formData.email, formData.password);
+
+      // Set user in context instead of local storage
+      setUser(result.user);
+
+      setSuccess('Account created successfully! Redirecting...');
       setTimeout(() => {
-        navigate('/profileform');
+        navigate('/profile'); // Redirect to profile page
       }, 1500);
     } catch (err) {
       setError(err.message || 'Failed to create account. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const { error } = await signInWithGoogle();
-      if (error) throw error;
-    } catch (err) {
-      setError(err.message || 'Failed to sign in with Google');
     } finally {
       setIsLoading(false);
     }
@@ -154,7 +144,7 @@ export default function SignUp() {
             transition={{ duration: 0.5 }}
           >
             <a href="/" className="inline-flex items-center">
-              <span className="text-3xl font-bold text-blue-600 dark:text-blue-400">CPier</span>
+              <span className="text-3xl font-bold text-orange-600 dark:text-Orange-400">CFolio</span>
             </a>
           </motion.div>
           <motion.h2
@@ -204,30 +194,6 @@ export default function SignUp() {
               </motion.div>
             )}
 
-            {/* Google Sign In Button */}
-            <motion.div variants={itemVariants}>
-              <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none transition duration-200"
-              >
-                <FcGoogle className="h-5 w-5" />
-                Continue with Google
-              </button>
-            </motion.div>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                  Or continue with email
-                </span>
-              </div>
-            </div>
-
             <motion.form className="space-y-6" onSubmit={handleSubmit} variants={containerVariants}>
               <motion.div variants={itemVariants}>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -262,7 +228,7 @@ export default function SignUp() {
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
                     required
                     value={formData.password}
@@ -319,7 +285,7 @@ export default function SignUp() {
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     autoComplete="new-password"
                     required
                     value={formData.confirmPassword}

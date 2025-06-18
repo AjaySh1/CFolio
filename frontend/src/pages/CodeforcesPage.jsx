@@ -5,7 +5,7 @@ import RatingChart from '../components/codeforces/RatingChart';
 import RecentContests from '../components/codeforces/RecentContests';
 import CalendarHeatmap from '../components/codeforces/CalendarHeatmap';
 import Header from '../components/Header';
-import { useUserProfile } from '../context/UserProfileContext';
+import { UserAuth } from '../context/AuthContext';
 
 // Color schemes for both modes
 const colorSchemes = {
@@ -26,7 +26,7 @@ const colorSchemes = {
 };
 
 const CodeforcesPage = () => {
-  const { profileData, loading: profileLoading, error: profileError } = useUserProfile();
+  const { user } = UserAuth(); // Use user from AuthContext
   const [username, setUsername] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
@@ -49,12 +49,12 @@ const CodeforcesPage = () => {
 
   const scheme = isDark ? colorSchemes.dark : colorSchemes.light;
 
-  // Get username from profile data
+  // Get username from user object
   useEffect(() => {
-    if (profileData?.codeforces_username) {
-      setUsername(profileData.codeforces_username);
+    if (user?.codeforces_username) {
+      setUsername(user.codeforces_username);
     }
-  }, [profileData]);
+  }, [user]);
 
   // Fetch Codeforces data when username changes
   useEffect(() => {
@@ -90,18 +90,10 @@ const CodeforcesPage = () => {
     return () => clearTimeout(timer);
   }, [username, API_BASE]);
 
-  if (profileLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (profileError) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-400">
-        <p>Error loading profile: {profileError}</p>
+        <p>Error: User not logged in</p>
       </div>
     );
   }

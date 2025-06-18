@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import LeetCodeStats from '../components/LeetCodeStats';
 import Header from '../components/Header';
-import { useUserProfile } from '../context/UserProfileContext';
+import { UserAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const NoUserNameFound = ({ service = "LeetCode", redirectPath = "/profile" }) => {
@@ -46,27 +46,27 @@ const NoUserNameFound = ({ service = "LeetCode", redirectPath = "/profile" }) =>
 };
 
 const LeetcodePage = () => {
-  const { profileData, error: profileError } = useUserProfile();
+  const { user } = UserAuth(); // Use user from AuthContext
   const [username, setUsername] = useState(null);
 
   useEffect(() => {
-    if (profileData && profileData.leetcode_username) {
-      setUsername(profileData.leetcode_username);
+    if (user && user.leetcode_username) {
+      setUsername(user.leetcode_username);
     } else {
       setUsername(null);
     }
-  }, [profileData]);
+  }, [user]);
 
-  if (profileError) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500 dark:text-red-400">
-        <p>Error loading profile: {profileError}</p>
+        <p>Error: User not logged in</p>
       </div>
     );
   }
 
   return (
-    <div className="  pt-20 min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 text-black dark:text-white">
+    <div className="pt-20 min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 text-black dark:text-white">
       <Header />
       <main className="container mx-auto px-4 py-10">
         <motion.div

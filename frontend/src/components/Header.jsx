@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { useUserProfile } from '../context/UserProfileContext';
+import { UserAuth } from '../context/AuthContext';
 import { Moon, Sun } from 'lucide-react';
 
 const Headers = () => {
@@ -11,7 +11,7 @@ const Headers = () => {
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef(null);
   const location = useLocation();
-  const { profileData } = useUserProfile();
+  const { user } = UserAuth(); // Use user from AuthContext
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -29,10 +29,10 @@ const Headers = () => {
   }, [darkMode]);
 
   const getUserInitial = () => {
-    if (!profileData || !profileData.name) {
+    if (!user || !user.name) {
       return '👤';
     }
-    return profileData.name.charAt(0).toUpperCase();
+    return user.name.charAt(0).toUpperCase();
   };
 
   useEffect(() => {
@@ -56,21 +56,21 @@ const Headers = () => {
     { 
       id: 'leetcode', 
       name: 'LeetCode', 
-      connected: !!profileData?.leetcode_username,
+      connected: !!user?.leetcode_username,
       colorConnected: 'bg-green-400',
       colorDisconnected: 'bg-red-400'
     },
     { 
       id: 'codeforces', 
       name: 'Codeforces', 
-      connected: !!profileData?.codeforces_username,
+      connected: !!user?.codeforces_username,
       colorConnected: 'bg-green-400',
       colorDisconnected: 'bg-red-400'
     },
     { 
       id: 'codechef', 
       name: 'CodeChef', 
-      connected: !!profileData?.codechef_username,
+      connected: !!user?.codechef_username,
       colorConnected: 'bg-green-400',
       colorDisconnected: 'bg-red-400'
     }

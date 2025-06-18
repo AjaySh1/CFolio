@@ -1,16 +1,19 @@
-// Simple in-memory user store for demo purposes
-const users = {};
+const User = require('../models/User');
 
 class userService {
-  // Update or create a user profile by email
-  static async updateProfile(email, profileData) {
-    users[email] = { ...profileData, updated_at: new Date() };
-    return users[email];
+  // Update or create a user profile by id
+  static async updateProfile(id, profileData) {
+    const user = await User.findByIdAndUpdate(
+      id,
+      { ...profileData, updated_at: new Date() },
+      { upsert: true, new: true }
+    );
+    return user;
   }
 
-  // Get a user profile by email
-  static async getProfile(email) {
-    return users[email] || null;
+  // Get a user profile by id
+  static async getProfile(id) {
+    return User.findById(id, '-password');
   }
 }
 

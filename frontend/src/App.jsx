@@ -1,6 +1,5 @@
 import './App.css';
-import { Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import Profile from './pages/Profile';
 import Contest from './pages/Contest';
 import LeetcodePage from './pages/LeetcodePage';
@@ -10,24 +9,22 @@ import Start from './pages/Start';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
-import MainLayout from './layouts/MainLayout';
+import { useUserProfile } from './context/UserProfileContext';
 
 function App() {
+  const { profileData } = useUserProfile();
+
   return (
     <Routes>
       {/* Public pages without Navbar */}
       <Route path='/' element={<Start />} />
-      <Route path='/login' element={<Login />} />
+      <Route path='/login' element={<Start/>} />
       <Route path='/signup' element={<SignUp />} />
 
       {/* Internal pages with Navbar via MainLayout */}
       <Route
-        path='/profile'
-        element={
-          <MainLayout>
-            <Profile />
-          </MainLayout>
-        }
+        path="/profile"
+        element={profileData ? <Profile /> : <Navigate to="/login" />}
       />
       <Route
         path='/contest'

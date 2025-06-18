@@ -161,8 +161,7 @@ export default function CFolioHome() {
             {cards.map((card, idx) => (
               <motion.div
                 key={idx}
-                className="p-6 bg-[#f7f7f5]
- dark:bg-gray-700 rounded-lg border border-red-200 dark:border-none shadow-sm hover:shadow-md transition-shadow duration-300 text-left"
+                className="p-6 bg-[#f7f7f5] dark:bg-gray-700 rounded-lg border border-red-200 dark:border-none shadow-sm hover:shadow-md transition-shadow duration-300 text-left"
                 variants={item}
               >
                 <div className="mb-4">{card.icon}</div>

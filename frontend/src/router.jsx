@@ -12,7 +12,7 @@ import Contest from "./pages/Contest";
 import ProfileForm from "./pages/ProfileForm";
 import PP from "./pages/PP";
 import UpdatePassword from "./pages/UpdatePassword";
-import AuthRoute from './components/AuthRoute'
+import AuthRoute from './components/AuthRoute';
 
 export const router = createBrowserRouter([
     { path: "/", element: <Start /> },
@@ -34,57 +34,58 @@ export const router = createBrowserRouter([
     },
     {
         path: "/update-password",
-        element: <UpdatePassword />
+        element: (
+            <PrivateRoute>
+                <UpdatePassword />
+            </PrivateRoute>
+        )
     },
     { path: "/privacy", element: <PP /> },
     {
         path: "/profile",
         element: (
-            <PrivateRoute>
+            
                 <Profile />
-            </PrivateRoute>
+           
         )
     },
     {
         path: "/dashboard",
         element: (
-            <PrivateRoute>
+          
                 <Dashboard />
-            </PrivateRoute>
+            
         )
-
     },
-
     {
         path: "/contest",
         element: (
-            <PrivateRoute>
+           
                 <Contest />
-            </PrivateRoute>
         )
     },
     {
         path: "/leetcode",
         element: (
-            <PrivateRoute>
+            
                 <LeetcodePage />
-            </PrivateRoute>
+           
         )
     },
     {
         path: "/codechef",
         element: (
-            <PrivateRoute>
+            
                 <CodechefPage />
-            </PrivateRoute>
+           
         )
     },
     {
         path: "/codeforces",
         element: (
-            <PrivateRoute>
+           
                 <CodeforcesPage />
-            </PrivateRoute>
+            
         )
     },
     {
