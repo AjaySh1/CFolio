@@ -1,6 +1,6 @@
-# 🧠 CPTracker
+# 🧠 CFolio
 
-**CPTracker** is a full-stack web application that helps you **track**, **visualize**, and **analyze** your competitive programming progress across major platforms — **LeetCode**, **Codeforces**, and **CodeChef**.
+**CFolio** is a full-stack web application that helps you **track**, **visualize**, and **analyze** your competitive programming progress across major platforms — **LeetCode**, **Codeforces**, and **CodeChef**.
 
 ## 🚀 Features
 
