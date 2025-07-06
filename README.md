@@ -26,7 +26,7 @@
 | **API Layer**| Public APIs + custom scraping services |
 
 ## 📁 Project Structure
-
+```
 CFolio/
 ├── backend/
 │   ├── controllers/
@@ -59,7 +59,7 @@ CFolio/
 │
 ├── README.md
 └── package.json
-
+```
 ---
 
 ## ⚙️ Environment Variables
