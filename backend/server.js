@@ -50,7 +50,9 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development' 
   });
 });
-
+app.get('/', (req, res) => {
+  res.json({ message: 'Backend is running!' });
+});
 // Fallback route for undefined endpoints
 app.use((req, res, next) => {
   res.status(404).json({ success: false, error: 'Route not found' });
