@@ -36,7 +36,7 @@ export default function SignUp() {
   const [success, setSuccess] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState([]);
-  const { signUpNewUser, setUser } = UserAuth(); // Ensure `setUser` is available in context
+  const { signUpNewUser, setUser } = UserAuth(); 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
