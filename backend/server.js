@@ -42,7 +42,14 @@ app.use('/api/dash', heatmapRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', profileRoutes);
-
+app.use(cors({
+  origin: [
+    'https://c-folio-ffzg.vercel.app', // your frontend Vercel URL
+    'http://localhost:5173'            // for local development
+  ],
+  credentials: true,
+  exposedHeaders: ['Authorization']
+}));
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
