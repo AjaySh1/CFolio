@@ -19,7 +19,6 @@ const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Security middleware
 // app.use(helmet());
@@ -68,9 +67,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// REMOVE app.listen() for Vercel deployment
+// app.listen(PORT, () => {
+//   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+// });
 
 module.exports = app;
