@@ -18,7 +18,7 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_BACKEND_URL || 'https://cfolio.onrender.com';
 
 export default function Profile() {
   const { user, setUser } = UserAuth(); // Retrieve user and setUser from context
