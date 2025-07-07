@@ -32,7 +32,7 @@ const CodechefPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statsData, setStatsData] = useState(null);
-  const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
   // Detect dark mode
   const [isDark, setIsDark] = useState(() =>

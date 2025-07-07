@@ -19,7 +19,7 @@ const Contest = () => {
     return unit.includes('hour') ? Math.round(timeValue * 60) : timeValue;
   };
 
-  const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchContests = async () => {

@@ -33,7 +33,7 @@ const Dashboard = () => {
 const User = user?.user || user; 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
   // Detect dark mode
   const [isDark, setIsDark] = useState(() =>
