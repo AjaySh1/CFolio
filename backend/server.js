@@ -22,14 +22,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_PROD_URL 
-    : 'http://localhost:5173',
-  credentials: true,
-  exposedHeaders: ['Authorization']
-}));
+// app.use(helmet());
+// app.use(cors({
+//   origin: process.env.NODE_ENV === 'production' 
+//     ? process.env.FRONTEND_PROD_URL 
+//     : 'http://localhost:5173',
+//   credentials: true,
+//   exposedHeaders: ['Authorization']
+// }));
 
 // Body parser middleware
 app.use(express.json());
