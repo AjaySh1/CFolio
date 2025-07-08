@@ -6,7 +6,7 @@ const connectDB = require('./db');
 
 // Connect to the database
 connectDB();
-const PORT = process.env.PORT || 5000;
+
 // Import routes
 const leetcodeRoutes = require('./routes/leetcodeRoutes');
 const codechefRoutes = require('./routes/codechefRoutes');
@@ -22,13 +22,13 @@ const app = express();
 
 // Security middleware
 // app.use(helmet());
-// app.use(cors({
-//   origin: process.env.NODE_ENV === 'production' 
-//     ? process.env.FRONTEND_PROD_URL 
-//     : 'http://localhost:5173',
-//   credentials: true,
-//   exposedHeaders: ['Authorization']
-// }));
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_PROD_URL 
+    : 'http://localhost:5173',
+  credentials: true,
+  exposedHeaders: ['Authorization']
+}));
 
 
 // Body parser middleware
@@ -78,8 +78,8 @@ app.use((err, req, res, next) => {
 });
 
 // REMOVE app.listen() for Vercel deployment
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+// });
 
 module.exports = app;
