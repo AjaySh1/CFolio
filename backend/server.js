@@ -45,8 +45,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', profileRoutes);
 app.use(cors({
   origin: [
-    'https://c-folio-ffzg.vercel.app', // your frontend Vercel URL
-    'http://localhost:5173'            // for local development
+    process.env.FRONTEND_URL,
+    'http://localhost:5173'
   ],
   credentials: true,
   exposedHeaders: ['Authorization']
