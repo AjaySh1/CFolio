@@ -23,13 +23,10 @@ const app = express();
 // Security middleware
 // app.use(helmet());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_PROD_URL 
-    : 'http://localhost:5173',
+  origin: 'https://c-folio-h28p.vercel.app',
   credentials: true,
   exposedHeaders: ['Authorization']
 }));
-
 
 // Body parser middleware
 app.use(express.json());
@@ -43,14 +40,7 @@ app.use('/api/dash', heatmapRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', profileRoutes);
-app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL,
-    'http://localhost:5173'
-  ],
-  credentials: true,
-  exposedHeaders: ['Authorization']
-}));
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
