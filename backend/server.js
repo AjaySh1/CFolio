@@ -6,7 +6,7 @@ const connectDB = require('./db');
 
 // Connect to the database
 connectDB();
-
+const PORT = process.env.PORT || 5000;
 // Import routes
 const leetcodeRoutes = require('./routes/leetcodeRoutes');
 const codechefRoutes = require('./routes/codechefRoutes');
