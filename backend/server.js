@@ -30,15 +30,7 @@ const app = express();
 //   exposedHeaders: ['Authorization']
 // }));
 
-const cors = require('cors');
-app.use(cors({
-  origin: [
-    'https://c-folio-j2k5.vercel.app', 
-    'http://localhost:5173'
-  ],
-  credentials: true,
-  exposedHeaders: ['Authorization']
-}));
+
 // Body parser middleware
 app.use(express.json());
 
@@ -86,8 +78,8 @@ app.use((err, req, res, next) => {
 });
 
 // REMOVE app.listen() for Vercel deployment
-// app.listen(PORT, () => {
-//   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-// });
+app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
 
 module.exports = app;
