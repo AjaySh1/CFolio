@@ -30,6 +30,15 @@ const app = express();
 //   exposedHeaders: ['Authorization']
 // }));
 
+const cors = require('cors');
+app.use(cors({
+  origin: [
+    'https://c-folio-j2k5.vercel.app', 
+    'http://localhost:5173'
+  ],
+  credentials: true,
+  exposedHeaders: ['Authorization']
+}));
 // Body parser middleware
 app.use(express.json());
 

@@ -31,7 +31,7 @@ const CodeforcesPage = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [fetchError, setFetchError] = useState('');
-  const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const API_BASE = import.meta.env.VITE_BACKEND_URL ;
 
   // Detect dark mode
   const [isDark, setIsDark] = useState(() =>

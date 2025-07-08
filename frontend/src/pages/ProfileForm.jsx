@@ -17,7 +17,7 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 },
 };
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
 export default function ProfileForm() {
   const [formData, setFormData] = useState({
