@@ -41,7 +41,7 @@ export default function PP() {
               className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl"
               variants={itemVariants}
             >
-              <span className="block">CPier</span>
+              <span className="block">CFolio</span>
               <span className="block text-blue-600 dark:text-blue-400">Privacy Policy</span>
             </motion.h1>
             <motion.p
@@ -70,7 +70,6 @@ export default function PP() {
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Introduction</h2>
               </div>
               <p className="text-gray-600 dark:text-gray-300">
-                CPier ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service that integrates with Google Calendar API and stores your competitive programming profiles. For demo and local use, your data is stored only temporarily on our server and is not shared with any third parties.
               </p>
             </div>
 
@@ -188,7 +187,7 @@ export default function PP() {
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Contact Us</h2>
               <p className="text-gray-600 dark:text-gray-300">
-                If you have any questions about this Privacy Policy, please contact us at developer91185@gmail.com.
+              
               </p>
             </div>
           </div>
