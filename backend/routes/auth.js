@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
 
@@ -12,12 +13,11 @@ const validateEmail = (email) => {
 // Signup route
 router.post('/signup', async (req, res) => {
   try {
-    console.log('Signup attempt:', req.body);
-    const { email, password } = req.body;
+    const { email, password, name } = req.body;
 
     // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Name, email, and password are required' });
     }
     if (!validateEmail(email)) {
       return res.status(400).json({ error: 'Invalid email format' });
@@ -35,18 +35,18 @@ router.post('/signup', async (req, res) => {
     // Hash the password
     const hash = await bcrypt.hash(password, 12);
 
-    // Create the user with a default name
-    const user = await User.create({ email, password: hash, name: 'Ajay' });
+    // Create the user
+    const user = await User.create({ email, password: hash, name });
 
-    // Respond with user data
-     if (user) {
-      console.log('Signup response:', { id: user._id, email: user.email, name: user.name });
-    } else {
-      console.error('User is undefined or null');
-    }
+    // Generate JWT
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.status(201).json({
-      
+      token,
       user: { id: user._id, email: user.email, name: user.name },
       message: 'Signup successful',
     });
@@ -81,8 +81,15 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Respond with user data
+    // Generate JWT
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.status(200).json({
+      token,
       user: { id: user._id, email: user.email, name: user.name },
       message: 'Login successful',
     });

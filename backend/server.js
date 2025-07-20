@@ -23,7 +23,10 @@ const app = express();
 // Security middleware
 // app.use(helmet());
 app.use(cors({
-  origin: 'https://c-folio-h28p.vercel.app',
+  origin: [
+    'https://c-folio-h28p.vercel.app',
+    'http://localhost:5173'
+  ],
   credentials: true,
   exposedHeaders: ['Authorization']
 }));
@@ -66,8 +69,8 @@ app.use((err, req, res, next) => {
       : { message: err.message, stack: err.stack }
   });
 });
-
-// REMOVE app.listen() for Vercel deployment
+// const PORT = process.env.PORT || 5000;
+// // REMOVE app.listen() for Vercel deployment
 // app.listen(PORT, () => {
 //   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 // });

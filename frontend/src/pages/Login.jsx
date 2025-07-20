@@ -29,7 +29,7 @@ export default function Login() {
   const [resetSent, setResetSent] = useState(false);
 
   const navigate = useNavigate();
-  const { loginUser } = UserAuth(); // Use AuthContext for login logic
+  const { loginUser, setUser } = UserAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -37,12 +37,14 @@ export default function Login() {
     setError('');
     setSuccess('');
     try {
-      const user = await loginUser(email, password); // Use loginUser from AuthContext
+      const user = await loginUser(email, password);
       setSuccess('Login successful! Redirecting...');
       setTimeout(() => {
-        navigate('/profile'); // Redirect to profile page
+        navigate('/dashboard'); // Redirect to dashboard after login
       }, 1500);
     } catch (err) {
+      setUser(null);
+      localStorage.removeItem('token');
       setError(err.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);

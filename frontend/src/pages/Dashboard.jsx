@@ -29,8 +29,8 @@ const colorSchemes = {
 };
 
 const Dashboard = () => {
- const { user } = UserAuth();
-const User = user?.user || user; 
+  const { user } = UserAuth();
+  const User = user?.user || user;
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const API_BASE = import.meta.env.VITE_BACKEND_URL;
@@ -64,14 +64,19 @@ const User = user?.user || user;
     leetcode_username: user?.leetcode_username || "",
     codechef_username: user?.codechef_username || "",
   };
-    console.log("UserProfile in Dashboard:", userProfile);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!user?.email) return;
+      if (!user?._id) return;
 
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/dashboard/${user._id}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/api/dashboard/${user._id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch dashboard data');
         }

@@ -1,7 +1,7 @@
 const codechefService = require("../services/codechefService");
 const axios = require('axios');
 const codechefController = {
-  
+
   async getProfileData(req, res) {
     try {
       const { username } = req.params;
@@ -91,22 +91,22 @@ const codechefController = {
         .json({ error: error.message || "Failed to extract contest graph" });
     }
   },
- async getTotalProblemsSolved(req, res) {
-  try {
-    const { username } = req.params;
-    if (!username) {
-      return res.status(400).json({ error: "Username is required" });
+  async getTotalProblemsSolved(req, res) {
+    try {
+      const { username } = req.params;
+      if (!username) {
+        return res.status(400).json({ error: "Username is required" });
+      }
+      const apiUrl = `https://codechef-api.vercel.app/${username}`;
+      const response = await axios.get(apiUrl);
+      return res.status(200).json({ fullySolved: response.data.fullySolved || 0 });
+    } catch (error) {
+      console.error("Error in getTotalProblemsSolved:", error);
+      return res
+        .status(500)
+        .json({ error: error.message || "Failed to get total problems solved" });
     }
-    const apiUrl = `https://codechef-api.vercel.app/${username}`;
-    const response = await axios.get(apiUrl);
-    return res.status(200).json({ fullySolved: response.data.fullySolved || 0 });
-  } catch (error) {
-    console.error("Error in getTotalProblemsSolved:", error);
-    return res
-      .status(500)
-      .json({ error: error.message || "Failed to get total problems solved" });
   }
-}
 };
 
 module.exports = codechefController;

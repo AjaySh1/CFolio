@@ -82,7 +82,7 @@ const RatingChart = ({ ratingHistory }) => {
           radius: 2
         },
         label: {
-          text: `#${contest.rank}`,
+          text: `${contest.rank}`,
           style: {
             color: '#fff',
             background: '#3B82F6',

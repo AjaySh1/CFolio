@@ -40,7 +40,6 @@ export const router = createBrowserRouter([
             </PrivateRoute>
         )
     },
-    { path: "/privacy", element: <PP /> },
     {
         path: "/profile",
         element: (

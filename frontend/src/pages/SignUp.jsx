@@ -36,7 +36,7 @@ export default function SignUp() {
   const [success, setSuccess] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState([]);
-  const { signUpNewUser, setUser } = UserAuth(); 
+  const { signUpNewUser, setUser } = UserAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -120,12 +120,11 @@ export default function SignUp() {
     try {
       const result = await signUpNewUser(formData.email, formData.password);
 
-      // Set user in context instead of local storage
       setUser(result.user);
 
       setSuccess('Account created successfully! Redirecting...');
       setTimeout(() => {
-        navigate('/profile'); // Redirect to profile page
+        navigate('/profile');
       }, 1500);
     } catch (err) {
       setError(err.message || 'Failed to create account. Please try again.');

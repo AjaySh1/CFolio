@@ -13,7 +13,6 @@ import { useUserProfile } from './context/UserProfileContext';
 
 function App() {
   const { profileData } = useUserProfile();
-
   return (
     <Routes>
       {/* Public pages without Navbar */}

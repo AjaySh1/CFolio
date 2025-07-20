@@ -1,11 +1,11 @@
-import { createContext, useContext, useState,useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-const API_BASE = import.meta.env.VITE_BACKEND_URL ;
+const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
 const AuthContext = createContext();
 
 export function AuthContextProvider({ children }) {
-   // 1. Try to load user from localStorage
+  // 1. Try to load user from localStorage
   const [user, setUser] = useState(() => {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : null;
@@ -20,6 +20,15 @@ export function AuthContextProvider({ children }) {
       localStorage.removeItem("user");
     }
   }, [user]);
+
+  // Save JWT token to localStorage
+  const saveToken = (token) => {
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+  };
 
   const signUpNewUser = async (email, password) => {
     setLoading(true);
@@ -37,6 +46,7 @@ export function AuthContextProvider({ children }) {
         throw new Error('Invalid response from server');
       }
       setUser({ id: data.user.id, email: data.user.email, name: data.user.name || 'Ajay' });
+      saveToken(data.token);
       return data;
     } catch (error) {
       console.error('Signup error:', error);
@@ -59,6 +69,7 @@ export function AuthContextProvider({ children }) {
         throw new Error(data.error || 'Login failed');
       }
       setUser(data.user);
+      saveToken(data.token);
       return data.user;
     } catch (error) {
       console.error('Login error:', error);
@@ -76,25 +87,31 @@ export function AuthContextProvider({ children }) {
       // ignore errors
     } finally {
       setUser(null);
+      saveToken(null);
       setLoading(false);
     }
   };
 
   const refreshUser = async (userId) => {
-  setLoading(true);
-  try {
-    const res = await fetch(`${API_BASE}/api/users/${userId}`);
-    if (!res.ok) {
-      throw new Error('Failed to fetch user data');
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE}/api/users/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      const data = await res.json();
+      setUser(data.user || data); // Set only the `user` object
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    } finally {
+      setLoading(false);
     }
-    const data = await res.json();
-    setUser(data.user || data); // Set only the `user` object
-  } catch (error) {
-    console.error('Error refreshing user:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <AuthContext.Provider
@@ -105,7 +122,7 @@ export function AuthContextProvider({ children }) {
         loginUser,
         logoutUser,
         setUser,
-        refreshUser, // Expose refreshUser
+        refreshUser,
       }}
     >
       {children}

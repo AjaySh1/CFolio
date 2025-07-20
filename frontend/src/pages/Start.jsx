@@ -135,7 +135,7 @@ export default function CFolioHome() {
             className="flex justify-center"
           >
             <a
-              href="/profile"
+              href="/login"
               className="bg-red-500 text-white px-6 py-3 rounded-md font-medium hover:bg-red-600 transition duration-300"
             >
               Launch Now
@@ -177,7 +177,7 @@ export default function CFolioHome() {
       <footer className="bg-gray-900 text-gray-300 py-8">
         <div className="max-w-6xl mx-auto px-4 flex flex-col items-center space-y-4">
           <a
-            href="https://github.com/suveerprasad/cp-tracker"
+            href="https://github.com/AjaySh1/CFolio"
             className="hover:text-red-400 transition"
             target="_blank"
             rel="noopener noreferrer"

@@ -68,7 +68,12 @@ const CodeforcesPage = () => {
       try {
         setLoading(true);
         setFetchError('');
-        const response = await fetch(`${API_BASE}/api/codeforces/profile/${username}?t=${Date.now()}`);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/api/codeforces/profile/${username}?t=${Date.now()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -162,7 +167,7 @@ const CodeforcesPage = () => {
                       </div>
                       <div className={`${isDark ? 'bg-gray-700/50' : 'bg-gray-100'} p-4 rounded-lg`}>
                         <h3 className={`${isDark ? 'text-blue-300' : 'text-blue-700'} text-sm`}>Problems Solved</h3>
-                        <p className="text-2xl font-bold">{userData.totalProblemsSolved || 0}</p>
+                        <p className="text-2xl font-bold">{userData.totalSolved || 0}</p>
                       </div>
                     </div>
                   </motion.div>

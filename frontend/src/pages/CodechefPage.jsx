@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import CodeChefStats from '../components/CodechefStats';
 import Header from '../components/Header';
-import { useUserProfile } from '../context/UserProfileContext';
+import { UserAuth } from '../context/AuthContext';
 
 // Color schemes for both modes
 const colorSchemes = {
@@ -27,7 +27,7 @@ const colorSchemes = {
 };
 
 const CodechefPage = () => {
-  const { profileData, loading: profileLoading, error: profileError } = useUserProfile();
+  const { user, loading: profileLoading } = UserAuth();
   const [username, setUsername] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,10 +51,12 @@ const CodechefPage = () => {
   const scheme = isDark ? colorSchemes.dark : colorSchemes.light;
 
   useEffect(() => {
-    if (profileData?.codechef_username) {
-      setUsername(profileData.codechef_username);
+    if (user && user.codechef_username) {
+      setUsername(user.codechef_username);
+    } else {
+      setUsername(null);
     }
-  }, [profileData]);
+  }, [user]);
 
   useEffect(() => {
     if (!username) {
@@ -98,14 +100,6 @@ const CodechefPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (profileError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-400">
-        <p>Error loading profile: {profileError}</p>
       </div>
     );
   }

@@ -23,7 +23,6 @@ const API_BASE = import.meta.env.VITE_BACKEND_URL || 'https://cfolio.onrender.co
 export default function Profile() {
   const { user, setUser } = UserAuth(); // Retrieve user and setUser from context
   const navigate = useNavigate();
-  console.log('User:', user);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -44,13 +43,17 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        if (!user?.id) {
+        if (!userId) {
           throw new Error('User ID is undefined');
         }
-        const res = await fetch(`${API_BASE}/api/users/${userId}`); // Use `_id` instead of `id`
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${API_BASE}/api/users/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         if (res.ok) {
           const data = await res.json();
-          console.log('Profile data fetched:', data);
           setProfileData({
             name: data.name || '',
             email: data.email || '',
@@ -69,7 +72,8 @@ export default function Profile() {
       }
     };
     fetchProfile();
-  }, [user?._id]); // Use `_id` for dependency
+    // eslint-disable-next-line
+  }, [userId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,13 +92,14 @@ export default function Profile() {
     try {
       // Exclude email from the request payload
       const { email, ...updateData } = profileData;
-
-      const res = await fetch(`${API_BASE}/api/users/${userId}`, { // Use `_id` instead of `id`
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(updateData), // Send only the fields excluding email
+        body: JSON.stringify(updateData),
       });
 
       if (!res.ok) {
@@ -104,9 +109,9 @@ export default function Profile() {
 
       const updatedProfile = await res.json();
       setSuccess('Profile updated successfully!');
-      setUser(updatedProfile.user || updatedProfile); // Update user in AuthContext
+      setUser(updatedProfile.user || updatedProfile);
       setTimeout(() => {
-        navigate('/dashboard'); // Redirect to dashboard after success
+        navigate('/dashboard');
       }, 1000);
     } catch (err) {
       setError(err.message);
@@ -117,6 +122,8 @@ export default function Profile() {
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/';
     }
   };
